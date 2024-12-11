@@ -14,29 +14,25 @@ def loadData():
 	print('[>] total number of safe reports: '+str(sum(safeList))+'/'+str(len(reportList)))
 		
 def determineSafety(reportString):
-	reportData=reportString.split(' ')
-	safeFlag=1	# safe by default
+	reportData=list(map(int,reportString.split(' ')))					# convert list to ints
+	safeFlag=1															# safe by default
+	lastDiff=0
 	
-	if(int(reportData[0])<int(reportData[1])):
-		valueRise=1	# increase
-	elif(int(reportData[0])>int(reportData[1])):
-		valueRise=0	# decrease
-	else:
-		valueRise=0
-		safeFlag=0	# break if unsafe
-		
-	for x in range(1,len(reportData)): # start from 1 to be able to look at the previous item
-		reportDiff=int(reportData[x])-int(reportData[x-1])
-		if(safeFlag==0):	# break if unsafe
+	for x in range(0,len(reportData)-1):									
+		if(reportData[x]==reportData[x+1]):							# duplicate items
+			safeFlag=0
 			break
-			
-		if(valueRise==0):
-			reportDiff=reportDiff*-1
-		
-		if(reportDiff<1 or reportDiff>3):
-			safeFlag=0	# break if unsafe
-	
-	print('[>] checking safety of '+reportString+'... '+str(safeFlag)+' (valueRise='+str(valueRise)+')')
+		else:
+			thisDiff=reportData[x+1]-reportData[x]
+			if(thisDiff>3 or thisDiff<-3):							# difference too great
+				safeFlag=0
+				break
+			if((thisDiff>0 and lastDiff<0) or (thisDiff<0 and lastDiff>0)):
+				safeFlag=0											# direction change
+				break
+			else:
+				lastDiff=thisDiff
+	print('[>] checking safety of '+reportString+'... '+str(safeFlag))
 	return(safeFlag)
 
 loadData()
